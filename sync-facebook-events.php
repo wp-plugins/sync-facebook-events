@@ -38,7 +38,7 @@ add_action('admin_menu', 'fbes_add_page');
 
 function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid) {
 	
-	require 'fb-sdk/src/facebook.php';
+	require 'facebook.php';
 	
 	$facebook = new Facebook(array(
 		'appId'  =>  $fbes_api_key,

@@ -20,6 +20,8 @@ Sync Facebook Events to The Events Calendar Plugin.
 
 == Frequently Asked Questions ==
 
+This plugin is designed to be used with The Events Calendar plugin.
+
 == Upgrade Notice ==
 
 == Screenshots ==
