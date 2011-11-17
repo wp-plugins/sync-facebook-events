@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Sync FB Events
+Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin
 Author: Mark Nelson
