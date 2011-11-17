@@ -94,7 +94,7 @@ function fbes_options_page() {
 		<form method="post" action="<?php echo $_SERVER['REQUEST_URI'] ?>">
 		<input type="hidden" name="update" />
 		<?php
-		echo '<form action="'. $_SERVER["REQUEST_URI"] .'" method="post"><table style="width:45%;">'; 
+		echo '<form action="'. $_SERVER["REQUEST_URI"] .'" method="post"><table style="width:500px;">'; 
 		echo '<tr><td>Facebook App ID:</td><td><input type="text" id="fbes_api_key" name="fbes_api_key" value="'.htmlentities($fbes_api_key).'" size="35" /></td><tr>';
 		echo '<tr><td>Facebook App Secret:</td><td><input type="text" id="fbes_api_secret" name="fbes_api_secret" value="'.htmlentities($fbes_api_secret) .'" size="35" /></td><tr>';
 		echo '<tr><td>Facebook Events UID:</td><td><input type="text" id="fbes_api_uid" name="fbes_api_uid" value="'.htmlentities($fbes_api_uid) .'" size="15" /></td></tr>';
