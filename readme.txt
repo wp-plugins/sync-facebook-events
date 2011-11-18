@@ -38,6 +38,10 @@ Q: Do my Facebook events get updated on a schedule?
 
 A: Currently, your Facebook events are updated only when you press the 'Update' button from the Sync FB Events section within settings.
 
+Q: Why do I get a blank screen when running an update?
+
+A: Check your Facebook App ID, Facebook App Secret and Facebook UID. One of them is probably incorect.
+
 Q: Why doesn't Modern Tribe just provide this functionality within their own plugin?
 
 A: I don't know, that's why I wrote this one :)
