@@ -141,14 +141,14 @@ function fbes_options_page() {
 		
 			if (array_key_exists($event['eid'], $eids)) {
 				tribe_update_event($args);
-				$action = "Updating: ".$eids[$event['eid']];
+				$action = "Updating:".$eids[$event['eid']];
 			} else {
 				$post_id = tribe_create_event($args);
-				$action = "Inserting: ".$post_id;
+				$action = "Inserting:".$post_id;
 			}
 			reset($eids);
 			
-			print $action;
+			print $action." ";
 		}
 		fclose($fp);
 		print "<br />";
