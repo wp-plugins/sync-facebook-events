@@ -26,6 +26,11 @@ Sync Facebook Events to The Events Calendar Plugin.
 Q: What is the Facebook App ID and App Secret, and why are they required?
 A: The Facebook App ID and App Secret are required by Facebook to access data via the Facebook graph API. To signup for a developer account or learn more see - http://developers.facebook.com/docs/guides/canvas/
 
+Q: How do I find the Facebook UID of the fan page I wish to syncronize events?
+A: Goto the fanpage you're interesting in - (ex. https://www.facebook.com/webtrends). 
+Copy the URL and replace 'www' with 'graph' (ex. https://graph.facebook.com/webtrends)
+The UID is the first item in the resulting text. In this examples it is "54905721286" (ex. "id": "54905721286")
+
 Q: Do my Facebook events get updated on a schedule?
 A: Currently, your Facebook events are updated only when you press the 'Update' button from the Sync FB Events section within settings.
 
