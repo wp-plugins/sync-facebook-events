@@ -56,5 +56,8 @@ Upgrade Notice
 
 == Changelog ==
 
+= 1.0.1 =
+* Improved update display
+
 = 1.0 =
 * Initial release
