@@ -151,8 +151,7 @@ function fbes_options_page() {
 			print $action." ";
 		}
 		fclose($fp);
-		print "<br />";
-	?>
+	?><br />
 	<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
 	</div>
 <? } ?>	
