@@ -4,7 +4,7 @@ Donate link: http://pdxt.com/
 Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
 Tested up to: 3.0
-Stable tag: 1.0
+Stable tag: 1.0.1
 
 Sync Facebook Events to The Events Calendar Plugin.
 
