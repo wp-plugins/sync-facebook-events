@@ -24,8 +24,8 @@ Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 == Frequently Asked Questions ==
 
 Q: What is the Facebook App ID and App Secret, and why are they required?
-A: The Facebook App ID
- and App Secret are required by Facebook to access data via the Facebook graph API. 
+
+A: The Facebook App ID and App Secret are required by Facebook to access data via the Facebook graph API. 
 To signup for a developer account or learn more see - http://developers.facebook.com/docs/guides/canvas/
 
 Q: How do I find the Facebook UID of the page for which I wish to synchronize events?
@@ -40,7 +40,7 @@ A: Currently, your Facebook events are updated only when you press the 'Update' 
 
 Q: Why do I get a blank screen when running an update?
 
-A: Check your Facebook App ID, Facebook App Secret and Facebook UID. One of them is probably incorect.
+A: Check your Facebook App ID, Facebook App Secret and Facebook UID. One of them is probably incorrect.
 
 Q: Why doesn't Modern Tribe just provide this functionality within their own plugin?
 
