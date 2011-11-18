@@ -1,7 +1,7 @@
 === Sync Facebook Events ===
 Contributors: markpdxt
 Donate link: http://pdxt.com/
-Tags: facebook, events
+Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
 Tested up to: 3.0
 Stable tag: 1.0
@@ -17,12 +17,21 @@ Sync Facebook Events to The Events Calendar Plugin.
 1. Download the plugin archive and expand it
 2. Upload the sync-facebook-events folder to your /wp-content/plugins/ directory
 3. Go to the plugins page and click 'Activate' for Sync FB Events
+4. Navigate to the Settings section within Wordpress and enter your Facebook App ID, App Secret & UID.
+5. Ensure The Events Calendar plugin is installed and configured - http://wordpress.org/extend/plugins/the-events-calendar/
+5. Press 'Update' to synchronize your current Facebook events for display within The Events Calendar.
 
 == Frequently Asked Questions ==
 
-This is a simple plugin that is designed to be used with The Events Calendar plugin.
+Q: What is the Facebook App ID and App Secret, and why are they required?
+A: The Facebook App ID and App Secret are required by Facebook to access data via the Facebook graph API. To signup for a developer account or learn more see - http://developers.facebook.com/docs/guides/canvas/
+
+Q: Do my Facebook events get updated on a schedule?
+A: Currently, your Facebook events are updated only when you press the 'Update' button from the Sync FB Events section within settings.
 
 == Upgrade Notice ==
+
+Upgrade Notice
 
 == Screenshots ==
 

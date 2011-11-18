@@ -141,18 +141,19 @@ function fbes_options_page() {
 		
 			if (array_key_exists($event['eid'], $eids)) {
 				tribe_update_event($args);
-				$action = "Updating Post: ".$eids[$event['eid']];
+				$action = "Updating: ".$eids[$event['eid']];
 			} else {
 				$post_id = tribe_create_event($args);
-				$action = "Inserting Post: ".$post_id;
+				$action = "Inserting: ".$post_id;
 			}
 			reset($eids);
 			
-			//print $action."<br />";
+			print $action;
 		}
 		fclose($fp);
+		print "<br />";
 	?>
-	<span style="color:red;">Events Calendar update finished.</span><br /><br />
+	<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
 	</div>
 <? } ?>	
 <?php	
