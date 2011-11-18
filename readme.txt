@@ -30,8 +30,8 @@ To signup for a developer account or learn more see - http://developers.facebook
 
 Q: How do I find the Facebook UID of the page for which I wish to synchronize events?
 
-A: Goto the page you're interested in - (ex. https://www.facebook.com/webtrends). 
-Copy the URL and replace 'www' with 'graph' - (ex. https://graph.facebook.com/webtrends)
+A: Goto the page you're interested in - ex. https://www.facebook.com/webtrends  
+Copy the URL and replace 'www' with 'graph' - ex. https://graph.facebook.com/webtrends 
 The UID is the first item in the resulting text. In this example it is "54905721286".
 
 Q: Do my Facebook events get updated on a schedule?
