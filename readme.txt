@@ -6,11 +6,11 @@ Requires at least: 3.0
 Tested up to: 3.0
 Stable tag: 1.0.1
 
-Sync Facebook Events to The Events Calendar Plugin.
+Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 
 == Description ==
 
-Sync Facebook Events to The Events Calendar Plugin.
+Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 
 == Installation ==
 
@@ -37,6 +37,10 @@ The UID is the first item in the resulting text. In this example it is "54905721
 Q: Do my Facebook events get updated on a schedule?
 
 A: Currently, your Facebook events are updated only when you press the 'Update' button from the Sync FB Events section within settings.
+
+Q: Why doesn't Modern Tribe just provide this functionality within their own plugin?
+
+A: I don't know, that's why I wrote this one :)
 
 == Upgrade Notice ==
 
