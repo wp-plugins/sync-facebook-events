@@ -3,7 +3,7 @@ Contributors: markpdxt
 Donate link: http://pdxt.com/
 Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
-Tested up to: 3.0
+Tested up to: 3.3.1
 Stable tag: 1.0.3
 
 Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
@@ -37,7 +37,7 @@ The UID is the first item in the resulting text. In this example it is "54905721
 
 Q: Do my Facebook events get updated on a schedule?
 
-A: Currently, your Facebook events are updated only when you press the 'Update' button from the Sync FB Events section within settings.
+A: Yes, You can choose the update interval and also update immediately when you press the 'Update' button from the Sync FB Events section within settings.
 
 Q: Why do I get a blank screen when running an update?
 
