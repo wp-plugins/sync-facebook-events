@@ -58,7 +58,7 @@ Upgrade Notice
 == Changelog ==
 
 = 1.0.2 =
-* Aautomatic daily event sync
+* Automatic daily event sync
 * Adjust event timezone to WordPress
 
 = 1.0.1 =
