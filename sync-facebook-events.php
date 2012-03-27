@@ -4,10 +4,10 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.2
+Version: 1.0.3
 Author URI: http://pdxt.com
 */
-
+ 
 /*  Copyright 2012 PDX Technologies, LLC. (mark.nelson@pdxt.com)
 
     This program is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ Author URI: http://pdxt.com
 
 register_activation_hook(__FILE__,'activate_fbes');
 register_deactivation_hook(__FILE__,'deactivate_fbes');
-function activate_fbes() { wp_schedule_event(time(), 'hourly', 'fbes_execute_sync'); }
+function activate_fbes() { wp_schedule_event(time(), 'daily', 'fbes_execute_sync'); }
 function deactivate_fbes() { wp_clear_scheduled_hook('fbes_execute_sync'); }
 add_action('fbes_execute_sync', 'fbes_process_events');
 
@@ -36,16 +36,11 @@ add_action('admin_menu', 'fbes_add_page');
 
 function fbes_process_events() {
 
-	$to = "notify@pdxt.com";
-	$subject = "fb sybc cron";
-	$message = "the event has run";
-	
-	wp_mail($to, $subject, $message);
-
 	#Get option values
 	$fbes_api_key = get_option('fbes_api_key');
 	$fbes_api_secret = get_option('fbes_api_secret');
 	$fbes_api_uid = get_option('fbes_api_uid');
+	$fbes_frequency = get_option('fbes_frequency');
 
 	$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid);
 	fbes_send_events($events);
@@ -131,6 +126,7 @@ function fbes_options_page() {
 	$fbes_api_key = get_option('fbes_api_key');
 	$fbes_api_secret = get_option('fbes_api_secret');
 	$fbes_api_uid = get_option('fbes_api_uid');
+	$fbes_frequency = get_option('fbes_frequency');
 	
 	#Get new updated option values, and save them
 	if( !empty($_POST['update']) ) {
@@ -143,6 +139,9 @@ function fbes_options_page() {
 
 		$fbes_api_uid = $_POST['fbes_api_uid'];
 		update_option('fbes_api_uid', $fbes_api_uid);
+
+		$fbes_frequency = $_POST['fbes_frequency'];
+		update_option('fbes_frequency', $fbes_frequency);
 		
 		$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid);
 
@@ -163,6 +162,24 @@ function fbes_options_page() {
 		echo '<tr><td>Facebook App ID:</td><td><input type="text" id="fbes_api_key" name="fbes_api_key" value="'.htmlentities($fbes_api_key).'" size="35" /></td><tr>';
 		echo '<tr><td>Facebook App Secret:</td><td><input type="text" id="fbes_api_secret" name="fbes_api_secret" value="'.htmlentities($fbes_api_secret) .'" size="35" /></td><tr>';
 		echo '<tr><td>Facebook Events UID:</td><td><input type="text" id="fbes_api_uid" name="fbes_api_uid" value="'.htmlentities($fbes_api_uid) .'" size="15" /></td></tr>';
+		echo '<tr><td>Update Fequency:</td><td><select id="fbes_frequency" name="fbes_frequency">';
+		
+		if(htmlentities($fbes_frequency)=="daily") {
+			echo '<option value="daily" SELECTED>Daily</option>';
+		} else {
+			echo '<option value="daily">Daily</option>';
+		}	
+		if(htmlentities($fbes_frequency)=="twicedaily") {
+			echo '<option value="twicedaily" SELECTED>Twice Daily</option>';
+		} else {
+			echo '<option value="twicedaily">Twice Daily</option>';
+		}
+		if(htmlentities($fbes_frequency)=="hourly") {
+			echo '<option value="hourly" SELECTED>Hourly</option>';
+		} else {
+			echo '<option value="hourly">Hourly</option>';
+		}
+		
 		echo '<tr><td colspan="2"></td></tr><tr><td colspan="2"><br /><input type="submit" value="Update" class="button-primary"';
 		      echo ' name="update" /></td></tr></table>';
 		?>

@@ -4,7 +4,7 @@ Donate link: http://pdxt.com/
 Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
 Tested up to: 3.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 
@@ -56,6 +56,9 @@ Upgrade Notice
 1. Facebook Event Sync Configuration
 
 == Changelog ==
+
+= 1.0.3 =
+* Ability to adjust update frequency
 
 = 1.0.2 =
 * Automatic daily event sync
