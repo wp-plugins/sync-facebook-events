@@ -4,12 +4,11 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.1
+Version: 1.0.2
 Author URI: http://pdxt.com
 */
- 
 
-/*  Copyright 2011 PDX Technologies, LLC. (mark.nelson@pdxt.com)
+/*  Copyright 2012 PDX Technologies, LLC. (mark.nelson@pdxt.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,18 +25,34 @@ Author URI: http://pdxt.com
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-function fbes_init(){
-}
+register_activation_hook(__FILE__,'activate_fbes');
+register_deactivation_hook(__FILE__,'deactivate_fbes');
+function activate_fbes() { wp_schedule_event(time(), 'hourly', 'fbes_execute_sync'); }
+function deactivate_fbes() { wp_clear_scheduled_hook('fbes_execute_sync'); }
+add_action('fbes_execute_sync', 'fbes_process_events');
 
-add_action("plugins_loaded", "fbes_init");
-
-function fbes_add_page() {
-	add_options_page('Sync FB Events', 'Sync FB Events', 8, __FILE__, 'fbes_options_page');
-}
+function fbes_add_page() { add_options_page('Sync FB Events', 'Sync FB Events', 8, __FILE__, 'fbes_options_page'); }
 add_action('admin_menu', 'fbes_add_page');
 
-function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid) {
+function fbes_process_events() {
+
+	$to = "notify@pdxt.com";
+	$subject = "fb sybc cron";
+	$message = "the event has run";
 	
+	wp_mail($to, $subject, $message);
+
+	#Get option values
+	$fbes_api_key = get_option('fbes_api_key');
+	$fbes_api_secret = get_option('fbes_api_secret');
+	$fbes_api_uid = get_option('fbes_api_uid');
+
+	$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid);
+	fbes_send_events($events);
+}
+
+function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid) {
+		
 	require 'facebook.php';
 	
 	$facebook = new Facebook(array(
@@ -55,9 +70,59 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid) {
 		'query'     => $fql,
 		'callback'  => ''
 	);
-
+	
 	$ret = $facebook->api($param);
 	return $ret;
+}
+
+function fbes_send_events($events) {
+
+	$i=0;
+	$query = new WP_Query( 'post_type=tribe_events&showposts=99999' );
+	foreach($query->posts as $post) {
+		foreach($post as $key=>$value) {
+			if($key=="to_ping") {
+				$eids[$value] = $post->ID;
+			}
+		}
+	}
+	wp_reset_query();
+	
+	$i=0;
+	foreach($events as $event) {
+		
+		$args['post_title'] = $event['name'];
+		
+		$offset = get_option('gmt_offset')*3600;
+		
+		$offsetStart = $event['start_time']+$offset;
+		$offsetEnd = $event['end_time']+$offset;
+				
+		$args['EventStartDate'] = date("m/d/Y", $offsetStart);
+		$args['EventStartHour'] = date("H", $offsetStart);
+		$args['EventStartMinute'] = date("i", $offsetStart);
+		
+		$args['EventEndDate'] = date("m/d/Y", $offsetEnd);
+		$args['EventEndHour'] = date("H", $offsetEnd);
+		$args['EventEndMinute'] = date("i", $offsetEnd);
+
+		$args['post_content'] = $event['description'];
+		$args['Venue']['Venue'] = $event['location'];
+		
+		$args['post_status'] = "Publish";
+		$args['to_ping'] = $event['eid'];
+	
+		if (array_key_exists($event['eid'], $eids)) {
+			tribe_update_event($eids[$event['eid']],$args);
+			$action = "Updating:".$eids[$event['eid']];
+		} else {
+			$post_id = tribe_create_event($args);
+			$action = "Inserting:".$post_id;
+		}
+		reset($eids);
+		
+		print $action." ";
+	}	
 }
 
 function fbes_options_page() {
@@ -106,52 +171,7 @@ function fbes_options_page() {
 <?php if(isset($events)) { ?>
 	<div style="margin-top:20px;font-size:14px;color:#444;border:1px solid #999;padding:15px;width:95%;font-face:couriernew;">
 	<span style="color:red;">Updaing all facebook events...</span><br />
-	<?
-		$i=0;
-		$query = new WP_Query( 'post_type=tribe_events&showposts=99999' );
-		foreach($query->posts as $post) {
-			foreach($post as $key=>$value) {
-				if($key=="to_ping") {
-					$eids[$value] = $post->ID;
-				}
-			}
-		}
-		wp_reset_query();
-		
-		$i=0;
-		foreach($events as $event) {
-			
-			$args['post_title'] = $event['name'];
-			
-			//$args['EventStartDate'] = date("Y-m-d H:i", $event['start_time']);
-			
-			$args['EventStartDate'] = date("m/d/Y", $event['start_time']);
-			$args['EventStartHour'] = date("H", $event['start_time']);
-			$args['EventStartMinute'] = date("i", $event['start_time']);
-			
-			$args['EventEndDate'] = date("m/d/Y", $event['end_time']);
-			$args['EventEndHour'] = date("H", $event['end_time']);
-			$args['EventEndMinute'] = date("i", $event['end_time']);
-
-			$args['post_content'] = $event['description'];
-			$args['Venue']['Venue'] = $event['location'];
-			
-			$args['post_status'] = "Publish";
-			$args['to_ping'] = $event['eid'];
-		
-			if (array_key_exists($event['eid'], $eids)) {
-				tribe_update_event($args);
-				$action = "Updating:".$eids[$event['eid']];
-			} else {
-				$post_id = tribe_create_event($args);
-				$action = "Inserting:".$post_id;
-			}
-			reset($eids);
-			
-			print $action." ";
-		}
-		fclose($fp);
-	?><br />
+	<?php fbes_send_events($events); ?><br />
 	<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
 	</div>
 <? } ?>	
