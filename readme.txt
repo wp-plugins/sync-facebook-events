@@ -23,7 +23,7 @@ http://wordpress.org/extend/plugins/the-events-calendar/
 4. Navigate to the Settings section within Wordpress and enter your Facebook App ID, App Secret & UID.
 5. Ensure The Events Calendar plugin is installed and configured - http://wordpress.org/extend/plugins/the-events-calendar/
 5. Press 'Update' to synchronize your current Facebook events for display within The Events Calendar.
-6. Synchronization will continue to occur on the schedule you set automatically. You can always update manually if/when needed.
+6. Synchronization will continue to occur on the schedule you set. You can always update manually if/when needed.
 
 == Frequently Asked Questions ==
 
