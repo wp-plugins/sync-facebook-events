@@ -61,7 +61,7 @@ Upgrade Notice
 == Changelog ==
 
 = 1.0.4 =
-* Allow event synchronization from multiples Facebook pages
+* Allow event synchronization from multiple Facebook pages
 
 = 1.0.3 =
 * Ability to adjust update frequency
