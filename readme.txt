@@ -4,7 +4,7 @@ Donate link: http://pdxt.com/
 Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
 Tested up to: 3.3.1
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 
 Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 
@@ -20,7 +20,7 @@ Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 4. Navigate to the Settings section within Wordpress and enter your Facebook App ID, App Secret & UID.
 5. Ensure The Events Calendar plugin is installed and configured - http://wordpress.org/extend/plugins/the-events-calendar/
 5. Press 'Update' to synchronize your current Facebook events for display within The Events Calendar.
-6. Synchronization will continue to occur once a day automatically. You can always update manually if/when needed.
+6. Synchronization will continue to occur on the schedule you set automatically. You can always update manually if/when needed.
 
 == Frequently Asked Questions ==
 
@@ -56,6 +56,9 @@ Upgrade Notice
 1. Facebook Event Sync Configuration
 
 == Changelog ==
+
+= 1.0.4 =
+* Allow event synchronization from multiples Facebook pages
 
 = 1.0.3 =
 * Ability to adjust update frequency

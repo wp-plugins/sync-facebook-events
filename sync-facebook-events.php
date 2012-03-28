@@ -4,7 +4,7 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.3
+Version: 1.0.4
 Author URI: http://pdxt.com
 */
  
@@ -31,6 +31,12 @@ function activate_fbes() { wp_schedule_event(time(), 'daily', 'fbes_execute_sync
 function deactivate_fbes() { wp_clear_scheduled_hook('fbes_execute_sync'); }
 add_action('fbes_execute_sync', 'fbes_process_events');
 
+function update_schedule($fbes_frequency) {
+	
+		wp_clear_scheduled_hook('fbes_execute_sync');
+		wp_schedule_event(time(), $fbes_frequency, 'fbes_execute_sync');
+}
+
 function fbes_add_page() { add_options_page('Sync FB Events', 'Sync FB Events', 8, __FILE__, 'fbes_options_page'); }
 add_action('admin_menu', 'fbes_add_page');
 
@@ -40,14 +46,15 @@ function fbes_process_events() {
 	$fbes_api_key = get_option('fbes_api_key');
 	$fbes_api_secret = get_option('fbes_api_secret');
 	$fbes_api_uid = get_option('fbes_api_uid');
+	$fbes_api_uids = get_option('fbes_api_uids');	
 	$fbes_frequency = get_option('fbes_frequency');
 
-	$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid);
+	$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids);
 	fbes_send_events($events);
 }
 
-function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid) {
-		
+function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
+
 	require 'facebook.php';
 	
 	$facebook = new Facebook(array(
@@ -56,17 +63,24 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid) {
 		'cookie' => true,
 	));
 
-	$fql = "SELECT eid, name, start_time, end_time, location, description
-			FROM event WHERE eid IN ( SELECT eid FROM event_member WHERE uid = $fbes_api_uid ) 
-			ORDER BY start_time desc";
+	$ret = array();
+	foreach ($fbes_api_uids as $key => $value) {
 
-	$param  =   array(
-		'method'    => 'fql.query',
-		'query'     => $fql,
-		'callback'  => ''
-	);
+		$fql = "SELECT eid, name, start_time, end_time, location, description
+				FROM event WHERE eid IN ( SELECT eid FROM event_member WHERE uid = $value ) 
+				ORDER BY start_time desc";
+
+		$param  =   array(
+			'method'    => 'fql.query',
+			'query'     => $fql,
+			'callback'  => ''
+		);
 	
-	$ret = $facebook->api($param);
+		$result = $facebook->api($param);
+		$ret = array_merge($ret, $result);
+	}
+	
+		
 	return $ret;
 }
 
@@ -82,7 +96,7 @@ function fbes_send_events($events) {
 		}
 	}
 	wp_reset_query();
-	
+		
 	$i=0;
 	foreach($events as $event) {
 		
@@ -122,10 +136,13 @@ function fbes_send_events($events) {
 
 function fbes_options_page() {
 
+	$fbes_api_uids = array();
+
 	#Get option values
 	$fbes_api_key = get_option('fbes_api_key');
 	$fbes_api_secret = get_option('fbes_api_secret');
 	$fbes_api_uid = get_option('fbes_api_uid');
+	$fbes_api_uids = get_option('fbes_api_uids');
 	$fbes_frequency = get_option('fbes_frequency');
 	
 	#Get new updated option values, and save them
@@ -143,14 +160,29 @@ function fbes_options_page() {
 		$fbes_frequency = $_POST['fbes_frequency'];
 		update_option('fbes_frequency', $fbes_frequency);
 		
-		$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uid);
+		$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids);
 
-		$msg = "Syncronization Completed.";
+		update_schedule($fbes_frequency);
+
+		$msg = "Syncronization of Events from Facebook Complete.";
 ?>
 		<div id="message" class="updated fade"><p><strong><?php echo $msg; ?></strong></p></div>
 <?php
-	}
-	
+	} elseif( !empty($_POST['add-uid']) ) {
+
+		if(!in_array($_POST['fbes_api_uid'], $fbes_api_uids)) {
+			$fbes_api_uids[] = $_POST['fbes_api_uid'];
+			update_option('fbes_api_uids', $fbes_api_uids);
+		}
+		
+	} elseif( !empty($_GET['r']) ) {
+		
+		foreach ($fbes_api_uids as $key => $value)
+			if($fbes_api_uids[$key] == $_GET['r'])
+				unset($fbes_api_uids[$key]);
+				
+		update_option('fbes_api_uids', $fbes_api_uids);
+	}	
 ?>
 	<div class="wrap">
 	 	<br /><div class="icon32" id="icon-plugins"><br/></div>
@@ -158,12 +190,11 @@ function fbes_options_page() {
 		<form method="post" action="<?php echo $_SERVER['REQUEST_URI'] ?>">
 		<input type="hidden" name="update" />
 		<?php
-		echo '<form action="'. $_SERVER["REQUEST_URI"] .'" method="post"><table style="width:500px;">'; 
+		echo '<form action="'. $_SERVER["REQUEST_URI"] .'" method="post"><table style="width:475px;">'; 
 		echo '<tr><td>Facebook App ID:</td><td><input type="text" id="fbes_api_key" name="fbes_api_key" value="'.htmlentities($fbes_api_key).'" size="35" /></td><tr>';
 		echo '<tr><td>Facebook App Secret:</td><td><input type="text" id="fbes_api_secret" name="fbes_api_secret" value="'.htmlentities($fbes_api_secret) .'" size="35" /></td><tr>';
-		echo '<tr><td>Facebook Events UID:</td><td><input type="text" id="fbes_api_uid" name="fbes_api_uid" value="'.htmlentities($fbes_api_uid) .'" size="15" /></td></tr>';
-		echo '<tr><td>Update Fequency:</td><td><select id="fbes_frequency" name="fbes_frequency">';
-		
+
+		echo '<tr><td>Update Fequency:</td><td><select id="fbes_frequency" name="fbes_frequency">';		
 		if(htmlentities($fbes_frequency)=="daily") {
 			echo '<option value="daily" SELECTED>Daily</option>';
 		} else {
@@ -179,19 +210,31 @@ function fbes_options_page() {
 		} else {
 			echo '<option value="hourly">Hourly</option>';
 		}
+		echo '</select>';
+		
+		echo '<tr><td>Add Facebook Page UID:</td><td><input type="text" id="fbes_api_uid" name="fbes_api_uid" value="" size="15" />';
+		echo '<input type="submit" value="Add" class="button-secondary" name="add-uid" /></td></tr>';
+
+		echo '<tr><td style="vertical-align:top;"></td><td>';
+
+		foreach ($fbes_api_uids as $value) {
+		    echo '&nbsp;&nbsp;'.$value.'&nbsp;&nbsp;<a href="'.$_SERVER["REQUEST_URI"].'&r='.$value.'">remove</a><br />';
+		}
+		
+		echo '</td></tr>';
 		
 		echo '<tr><td colspan="2"></td></tr><tr><td colspan="2"><br /><input type="submit" value="Update" class="button-primary"';
-		      echo ' name="update" /></td></tr></table>';
+		echo ' name="update" /></td></tr></table>';
 		?>
 		</form>
 	</div>
-<?php if(isset($events)) { ?>
-	<div style="margin-top:20px;font-size:14px;color:#444;border:1px solid #999;padding:15px;width:95%;font-face:couriernew;">
-	<span style="color:red;">Updaing all facebook events...</span><br />
-	<?php fbes_send_events($events); ?><br />
-	<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
-	</div>
-<? } ?>	
+	<?php if(isset($events)) { ?>
+		<div style="margin-top:20px;font-size:14px;color:#444;border:1px solid #999;padding:15px;width:95%;font-face:couriernew;">
+		<span style="color:red;">Updaing all facebook events...</span><br />
+		<?php fbes_send_events($events); ?><br />
+		<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
+		</div>
+	<? } ?>
 <?php	
 }
 ?>
