@@ -8,9 +8,6 @@ Stable tag: 1.0.4
 
 Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
 
-Get The Events Calendar plugin:
-http://wordpress.org/extend/plugins/the-events-calendar/
-
 == Description ==
 
 Sync Facebook Events to The Events Calendar Plugin by Modern Tribe.
