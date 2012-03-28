@@ -61,14 +61,14 @@ Upgrade Notice
 == Changelog ==
 
 = 1.0.4 =
-* Allow event synchronization from multiple Facebook pages
+* Added ability to allow event synchronization from multiple Facebook pages
 
 = 1.0.3 =
-* Ability to adjust update frequency
+* Added ability to adjust event sync frequency
 
 = 1.0.2 =
-* Automatic daily event sync
-* Adjust event timezone to WordPress
+* Added automatic daily event sync
+* Added ability to adjust event timezone to WordPress
 
 = 1.0.1 =
 * Improved update display
