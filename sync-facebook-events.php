@@ -4,7 +4,7 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.4
+Version: 1.0.5
 Author URI: http://pdxt.com
 */
  
@@ -66,18 +66,20 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
 	$ret = array();
 	foreach ($fbes_api_uids as $key => $value) {
 
-		$fql = "SELECT eid, name, start_time, end_time, location, description
-				FROM event WHERE eid IN ( SELECT eid FROM event_member WHERE uid = $value ) 
-				ORDER BY start_time desc";
+		if($value!='') {
+			$fql = "SELECT eid, name, start_time, end_time, location, description
+					FROM event WHERE eid IN ( SELECT eid FROM event_member WHERE uid = $value ) 
+					ORDER BY start_time desc";
 
-		$param  =   array(
-			'method'    => 'fql.query',
-			'query'     => $fql,
-			'callback'  => ''
-		);
+			$param  =   array(
+				'method'    => 'fql.query',
+				'query'     => $fql,
+				'callback'  => ''
+			);
 	
-		$result = $facebook->api($param);
-		$ret = array_merge($ret, $result);
+			$result = $facebook->api($param);
+			$ret = array_merge($ret, $result);
+		}
 	}
 	
 		
@@ -218,7 +220,8 @@ function fbes_options_page() {
 		echo '<tr><td style="vertical-align:top;"></td><td>';
 
 		foreach ($fbes_api_uids as $value) {
-		    echo '&nbsp;&nbsp;'.$value.'&nbsp;&nbsp;<a href="'.$_SERVER["REQUEST_URI"].'&r='.$value.'">remove</a><br />';
+			if($value!='')
+		    	echo '&nbsp;&nbsp;'.$value.'&nbsp;&nbsp;<a href="'.$_SERVER["REQUEST_URI"].'&r='.$value.'">remove</a><br />';
 		}
 		
 		echo '</td></tr>';
