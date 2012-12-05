@@ -1,10 +1,9 @@
 === Sync Facebook Events ===
-Contributors: markpdxt
-Donate link: http://pdxt.com/
+Contributors: markpdxt, scottconnerly
 Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
-Tested up to: 3.3.1
-Stable tag: 1.0.6
+Tested up to: 3.4.2
+Stable tag: 1.0.7
 
 A simple plugin to Sync Facebook events to The Events Calendar plugin by Modern Tribe.
 
@@ -48,7 +47,7 @@ A: Check your Facebook App ID, Facebook App Secret and Facebook UID. One of them
 
 Q: Why doesn't Modern Tribe just provide this functionality within their own plugin?
 
-A: I don't know, that's why I wrote this one :)
+A: They incorporated this one, actually.
 
 == Upgrade Notice ==
 
@@ -59,6 +58,9 @@ Upgrade Notice
 1. Facebook Event Sync Configuration
 
 == Changelog ==
+
+= 1.0.7 =
+* Fixing the duplicate events issue (finally).
 
 = 1.0.6 =
 * Adding the correct post_type for modern tribe events
