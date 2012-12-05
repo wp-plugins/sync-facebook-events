@@ -49,6 +49,7 @@ function fbes_process_events() {
 	$fbes_api_uids = get_option('fbes_api_uids');	
 	$fbes_frequency = get_option('fbes_frequency');
 
+	
 	$events = fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids);
 	fbes_send_events($events);
 }
@@ -67,6 +68,7 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
 	foreach ($fbes_api_uids as $key => $value) {
 
 		if($value!='') {
+			//https://developers.facebook.com/docs/reference/fql/event/
 			$fql = "SELECT eid, name, start_time, end_time, location, description
 					FROM event WHERE eid IN ( SELECT eid FROM event_member WHERE uid = $value ) 
 					ORDER BY start_time desc";
@@ -78,6 +80,8 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
 			);
 	
 			$result = $facebook->api($param);
+			foreach($result as $k => $v)
+				$result[$k]['uid'] = $value;
 			$ret = array_merge($ret, $result);
 		}
 	}
@@ -86,20 +90,38 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
 	return $ret;
 }
 
+function fbes_segments($url='') {
+	$parsed_url = parse_url($url);
+	$path = trim($parsed_url['path'],'/');
+	return explode('/',$path);
+}
+
 function fbes_send_events($events) {
 
-	$i=0;
-	$query = new WP_Query( 'post_type=tribe_events&showposts=99999' );
+	$query = new WP_Query(array(
+		'post_type'=>'tribe_events',
+		'posts_per_page'=>'-1'
+	));
+
 	foreach($query->posts as $post) {
-		foreach($post as $key=>$value) {
-			if($key=="to_ping") {
-				$eids[$value] = $post->ID;
-			}
+		if(!empty($post->to_ping)) {
+			$segments = fbes_segments($post->to_ping);
+			$eid = array_pop($segments);
+			$eids[$eid] = $post->ID;
 		}
+//if you're reading this and you want to delete all those duplicate events, uncomment this temporarially. Note, it will also delete all manually made events since June 13
+//http://codex.wordpress.org/Version_3.4 - June 13, 2012
+//depending on many duplicates you had, you might end up re-loading this script a bunch of times after it times out. Me, I had 14k duplicates. Had to run the script like 10 times.
+/*
+		else {
+			$post_date = trim(substr($post->post_date, 0, 10));
+			if($post->post_date > '2012-06-12')
+				wp_delete_post($post->ID);
+		}
+*/
 	}
-	wp_reset_query();
-		
-	$i=0;
+	//file_put_contents($_SERVER['DOCUMENT_ROOT'].'/fbevent.log', print_r(array(time(),$events,$eids),1)."\n".str_repeat('=',40)."\n", FILE_APPEND);
+	
 	foreach($events as $event) {
 		
 		$args['post_title'] = $event['name'];
@@ -108,33 +130,59 @@ function fbes_send_events($events) {
 		
 		$offsetStart = $event['start_time']+$offset;
 		$offsetEnd = $event['end_time']+$offset;
+		
+		//don't update or insert events from the past.
+		if($offsetEnd > time()) {
 				
-		$args['EventStartDate'] = date("m/d/Y", $offsetStart);
-		$args['EventStartHour'] = date("H", $offsetStart);
-		$args['EventStartMinute'] = date("i", $offsetStart);
-		
-		$args['EventEndDate'] = date("m/d/Y", $offsetEnd);
-		$args['EventEndHour'] = date("H", $offsetEnd);
-		$args['EventEndMinute'] = date("i", $offsetEnd);
-
-		$args['post_content'] = $event['description'];
-		$args['Venue']['Venue'] = $event['location'];
-		
-		$args['post_status'] = "Publish";
-		$args['post_type'] = "tribe_events";
-		$args['to_ping'] = $event['eid'];
+			$args['EventStartDate'] = date("m/d/Y", $offsetStart);
+			$args['EventStartHour'] = date("H", $offsetStart);
+			$args['EventStartMinute'] = date("i", $offsetStart);
+			
+			$args['EventEndDate'] = date("m/d/Y", $offsetEnd);
+			$args['EventEndHour'] = date("H", $offsetEnd);
+			$args['EventEndMinute'] = date("i", $offsetEnd);
 	
-		if (array_key_exists($event['eid'], $eids)) {
-			tribe_update_event($eids[$event['eid']],$args);
-			$action = "Updating:".$eids[$event['eid']];
-		} else {
-			$post_id = tribe_create_event($args);
-			$action = "Inserting:".$post_id;
+			$args['post_content'] = $event['description'];
+			$args['Venue']['Venue'] = $event['location'];
+			
+			$args['post_status'] = "Publish";
+			$args['post_type'] = "tribe_events";
+			//$args['to_ping'] = $event['eid']; //damn you, sanitize_trackback_urls in 3.4
+			$args['to_ping'] = 'https://www.facebook.com/events/'.$event['eid'].'/';
+			
+			if($args['EventStartHour'] == '22' && $event['uid'] == '256763181050120') { //why are UT events 2 hours off???
+				$args['EventStartHour'] = '20';
+				$args['EventEndHour'] = '22';
+				$args['EventEndDate'] = date('m/d/Y',strtotime($args['EventEndDate'], '-1 day'));
+			}
+
+			$inserting = $post_id = false;
+			if (!array_key_exists($event['eid'], $eids)) {
+				//double check
+				$already_exists = false;
+				foreach($query->posts as $post) {
+					if($post->to_ping == $args['to_ping'] || trim($post->pinged) == $args['to_ping']) {
+						$already_exists = true;
+					}
+				}
+				if(!$already_exists) {
+					file_put_contents($_SERVER['DOCUMENT_ROOT'].'/fbevent.log', print_r(array(time(),'creating', $args, $eids, $query->posts),1)."\n".str_repeat('=',40)."\n", FILE_APPEND);
+					$post_id = tribe_create_event($args);
+					echo "<br />Inserting: ".$post_id;
+					$inserting = true;
+				}
+			}
+			if(!$inserting) {
+				$post_id = $eids[$event['eid']];
+				tribe_update_event($post_id, $args);
+				echo "<br />Updating: ".$eids[$event['eid']];
+			}
+			if($post_id) 
+				update_metadata('post', $post_id, 'fb_event_obj', $event);
+				//eid, name, start_time, end_time, location, description
 		}
 		reset($eids);
-		
-		print $action." ";
-	}	
+	}
 }
 
 function fbes_options_page() {
