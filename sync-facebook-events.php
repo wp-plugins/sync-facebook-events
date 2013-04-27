@@ -4,11 +4,12 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.6
+Version: 1.0.7
+Revision by: Sam Haines (Wordpress username shaines1)
 Author URI: http://pdxt.com
 */
  
-/*  Copyright 2012 PDX Technologies, LLC. (mark.nelson@pdxt.com)
+/*  Copyright 2013 PDX Technologies, LLC. (mark.nelson@pdxt.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,6 +64,8 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
 		'secret' =>  $fbes_api_secret,
 		'cookie' => true,
 	));
+Facebook::$CURL_OPTS[CURLOPT_SSL_VERIFYPEER] = false;
+Facebook::$CURL_OPTS[CURLOPT_SSL_VERIFYHOST] = 2;
 
 	$ret = array();
 	foreach ($fbes_api_uids as $key => $value) {
@@ -102,7 +105,9 @@ function fbes_send_events($events) {
 		'post_type'=>'tribe_events',
 		'posts_per_page'=>'-1'
 	));
-
+	
+	
+	
 	foreach($query->posts as $post) {
 		if(!empty($post->to_ping)) {
 			$segments = fbes_segments($post->to_ping);
@@ -123,17 +128,15 @@ function fbes_send_events($events) {
 	//file_put_contents($_SERVER['DOCUMENT_ROOT'].'/fbevent.log', print_r(array(time(),$events,$eids),1)."\n".str_repeat('=',40)."\n", FILE_APPEND);
 	
 	foreach($events as $event) {
-		
 		$args['post_title'] = $event['name'];
 		
 		$offset = get_option('gmt_offset')*3600;
 		
-		$offsetStart = $event['start_time']+$offset;
+		$offsetStart = strtotime($event['start_time'])+$offset;
 		$offsetEnd = $event['end_time']+$offset;
 		
 		//don't update or insert events from the past.
-		if($offsetEnd > time()) {
-				
+		if($offsetStart > time()) {
 			$args['EventStartDate'] = date("m/d/Y", $offsetStart);
 			$args['EventStartHour'] = date("H", $offsetStart);
 			$args['EventStartMinute'] = date("i", $offsetStart);
@@ -181,7 +184,7 @@ function fbes_send_events($events) {
 				update_metadata('post', $post_id, 'fb_event_obj', $event);
 				//eid, name, start_time, end_time, location, description
 		}
-		reset($eids);
+		//reset($eids);
 	}
 }
 
@@ -282,11 +285,11 @@ function fbes_options_page() {
 	</div>
 	<?php if(isset($events)) { ?>
 		<div style="margin-top:20px;font-size:14px;color:#444;border:1px solid #999;padding:15px;width:95%;font-face:couriernew;">
-		<span style="color:red;">Updaing all facebook events...</span><br />
+		<span style="color:red;">Updating all facebook events...</span><br />
 		<?php fbes_send_events($events); ?><br />
 		<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
 		</div>
-	<? } ?>
+	<?php } ?>
 <?php	
 }
 ?>
