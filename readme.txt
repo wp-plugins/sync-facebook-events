@@ -2,8 +2,8 @@
 Contributors: markpdxt, scottconnerly
 Tags: facebook, events, synchronize, calendar
 Requires at least: 3.0
-Tested up to: 3.4.2
-Stable tag: 1.0.8
+Tested up to: 3.5.1
+Stable tag: 1.0.9
 
 A simple plugin to Sync Facebook events to The Events Calendar plugin by Modern Tribe.
 
