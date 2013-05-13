@@ -4,8 +4,7 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.7
-Revision by: Sam Haines (Wordpress username shaines1)
+Version: 1.0.8
 Author URI: http://pdxt.com
 */
  
@@ -114,16 +113,6 @@ function fbes_send_events($events) {
 			$eid = array_pop($segments);
 			$eids[$eid] = $post->ID;
 		}
-//if you're reading this and you want to delete all those duplicate events, uncomment this temporarially. Note, it will also delete all manually made events since June 13
-//http://codex.wordpress.org/Version_3.4 - June 13, 2012
-//depending on many duplicates you had, you might end up re-loading this script a bunch of times after it times out. Me, I had 14k duplicates. Had to run the script like 10 times.
-/*
-		else {
-			$post_date = trim(substr($post->post_date, 0, 10));
-			if($post->post_date > '2012-06-12')
-				wp_delete_post($post->ID);
-		}
-*/
 	}
 	//file_put_contents($_SERVER['DOCUMENT_ROOT'].'/fbevent.log', print_r(array(time(),$events,$eids),1)."\n".str_repeat('=',40)."\n", FILE_APPEND);
 	
@@ -132,7 +121,9 @@ function fbes_send_events($events) {
 		
 		$offset = get_option('gmt_offset')*3600;
 		
-		$offsetStart = strtotime($event['start_time'])+$offset;
+		//$offsetStart = strtotime($event['start_time'])+$offset;
+		$offsetStart =($event['start_time'])+$offset;
+		
 		$offsetEnd = $event['end_time']+$offset;
 		
 		//don't update or insert events from the past.
