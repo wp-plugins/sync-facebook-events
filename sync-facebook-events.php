@@ -4,11 +4,11 @@ Plugin Name: Sync Facebook Events
 Plugin URI: http://pdxt.com
 Description: Sync Facebook Events to The Events Calendar Plugin 
 Author: Mark Nelson
-Version: 1.0.6
+Version: 1.0.8
 Author URI: http://pdxt.com
 */
  
-/*  Copyright 2012 PDX Technologies, LLC. (mark.nelson@pdxt.com)
+/*  Copyright 2013 PDX Technologies, LLC. (mark.nelson@pdxt.com)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,6 +63,8 @@ function fbes_get_events($fbes_api_key, $fbes_api_secret, $fbes_api_uids) {
 		'secret' =>  $fbes_api_secret,
 		'cookie' => true,
 	));
+Facebook::$CURL_OPTS[CURLOPT_SSL_VERIFYPEER] = false;
+Facebook::$CURL_OPTS[CURLOPT_SSL_VERIFYHOST] = 2;
 
 	$ret = array();
 	foreach ($fbes_api_uids as $key => $value) {
@@ -102,38 +104,30 @@ function fbes_send_events($events) {
 		'post_type'=>'tribe_events',
 		'posts_per_page'=>'-1'
 	));
-
+	
+	
+	
 	foreach($query->posts as $post) {
 		if(!empty($post->to_ping)) {
 			$segments = fbes_segments($post->to_ping);
 			$eid = array_pop($segments);
 			$eids[$eid] = $post->ID;
 		}
-//if you're reading this and you want to delete all those duplicate events, uncomment this temporarially. Note, it will also delete all manually made events since June 13
-//http://codex.wordpress.org/Version_3.4 - June 13, 2012
-//depending on many duplicates you had, you might end up re-loading this script a bunch of times after it times out. Me, I had 14k duplicates. Had to run the script like 10 times.
-/*
-		else {
-			$post_date = trim(substr($post->post_date, 0, 10));
-			if($post->post_date > '2012-06-12')
-				wp_delete_post($post->ID);
-		}
-*/
 	}
 	//file_put_contents($_SERVER['DOCUMENT_ROOT'].'/fbevent.log', print_r(array(time(),$events,$eids),1)."\n".str_repeat('=',40)."\n", FILE_APPEND);
 	
 	foreach($events as $event) {
-		
 		$args['post_title'] = $event['name'];
 		
 		$offset = get_option('gmt_offset')*3600;
 		
-		$offsetStart = $event['start_time']+$offset;
+		//$offsetStart = strtotime($event['start_time'])+$offset;
+		$offsetStart =($event['start_time'])+$offset;
+		
 		$offsetEnd = $event['end_time']+$offset;
 		
 		//don't update or insert events from the past.
-		if($offsetEnd > time()) {
-				
+		if($offsetStart > time()) {
 			$args['EventStartDate'] = date("m/d/Y", $offsetStart);
 			$args['EventStartHour'] = date("H", $offsetStart);
 			$args['EventStartMinute'] = date("i", $offsetStart);
@@ -181,7 +175,7 @@ function fbes_send_events($events) {
 				update_metadata('post', $post_id, 'fb_event_obj', $event);
 				//eid, name, start_time, end_time, location, description
 		}
-		reset($eids);
+		//reset($eids);
 	}
 }
 
@@ -282,11 +276,11 @@ function fbes_options_page() {
 	</div>
 	<?php if(isset($events)) { ?>
 		<div style="margin-top:20px;font-size:14px;color:#444;border:1px solid #999;padding:15px;width:95%;font-face:couriernew;">
-		<span style="color:red;">Updaing all facebook events...</span><br />
+		<span style="color:red;">Updating all facebook events...</span><br />
 		<?php fbes_send_events($events); ?><br />
 		<span style="color:red;">Events Calendar updated with current Facebook events.</span><br /><br />
 		</div>
-	<? } ?>
+	<?php } ?>
 <?php	
 }
 ?>
